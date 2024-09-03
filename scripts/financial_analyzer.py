@@ -2,6 +2,7 @@ import yfinance as yf
 import talib as ta
 import pandas as pd
 import numpy as np
+import os
 import plotly.express as px
 from pypfopt.efficient_frontier import EfficientFrontier
 from pypfopt import risk_models
@@ -13,8 +14,8 @@ class FinancialAnalyzer:
         self.start_date = start_date
         self.end_date = end_date
 
-    def retrieve_stock_data(self):
-        return yf.download(self.ticker, start=self.start_date, end=self.end_date)
+    # def retrieve_stock_data(self):
+    #     return yf.download(self.ticker, start=self.start_date, end=self.end_date)
 
     def calculate_moving_average(self, data, window_size):
         return ta.SMA(data, timeperiod=window_size)
@@ -63,5 +64,39 @@ class FinancialAnalyzer:
         weights = ef.max_sharpe()
         portfolio_return, portfolio_volatility, sharpe_ratio = ef.portfolio_performance()
         return portfolio_return, portfolio_volatility, sharpe_ratio
+    def load_stock_data(self, ticker):
+
+        file_path = f'../yfinance_data/{ticker}_historical_data.csv'  # Adjust path if needed
+
+        # Check if file exists before reading
+        if os.path.isfile(file_path):
+            # Load the data and set 'Date' as the index
+            data = pd.read_csv(file_path)
+            data['Date'] = pd.to_datetime(data['Date'])
+            data.set_index('Date', inplace=True)
+            return data
+        else:
+            print(f"Warning: File not found for ticker {ticker} at path {file_path}")
+            return None
+
+    def get_min_max_dates(self, tickers):
+
+        stock_dates = {}
+
+        for ticker in tickers:
+            data = self.load_stock_data(ticker)
+            if data is not None:
+                # Ensure the 'Date' column is in datetime format
+                data['Date'] = pd.to_datetime(data['Date'])
+
+                # Get the minimum and maximum dates
+                min_date = data['Date'].min()
+                max_date = data['Date'].max()
+
+                # Store the min and max dates in the dictionary
+                stock_dates[ticker] = (min_date, max_date)
+
+        return stock_dates
+
 
 
