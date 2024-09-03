@@ -35,6 +35,9 @@ class FinancialAnalyzer:
     def plot_stock_data(self, data):
         fig = plt.line(data, x=data.index, y=['Close', 'SMA'], title='Stock Price with Moving Average')
         fig.show()
+    def plot_merged_stock_data(self, data):
+        fig = plt.line(data, x=data.index, y=[data['Close'] , data['SMA'] ], title='Stock Price with Moving Average')
+        fig.show()
 
     def plot_rsi(self, data):
         fig = px.line(data, x=data.index, y='RSI', title='Relative Strength Index (RSI)')
@@ -49,7 +52,8 @@ class FinancialAnalyzer:
         fig.show()
     
     def calculate_portfolio_weights(self, tickers, start_date, end_date):
-        data = yf.download(tickers, start=start_date, end=end_date)['Close']
+        data = self.load_stock_data(tickers)['Close']
+        # data = yf.download(tickers, start=start_date, end=end_date)['Close']
         mu = expected_returns.mean_historical_return(data)
         cov = risk_models.sample_cov(data)
         ef = EfficientFrontier(mu, cov)
