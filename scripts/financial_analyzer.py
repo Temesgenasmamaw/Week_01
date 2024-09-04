@@ -131,5 +131,3 @@ class FinancialAnalyzer:
         indicators[f'{stock_symbol}_MACD_Hist'] = macd_hist
 
         return indicators
-
-
